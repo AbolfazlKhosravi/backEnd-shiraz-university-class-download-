@@ -14,7 +14,7 @@
 
 ابتدا مخزن را کلون کنید:
 ```sh
-git clone https://github.com/your-repo/shiraz-university-class-download.git
+git clone https://github.com/AbolfazlKhosravi/backEnd-shiraz-university-class-download-.git
 ```
 
 ### ۱. نصب وابستگی‌ها
@@ -73,7 +73,7 @@ npm run dev
 ## 🛠 API Endpoints
 
 ### **۱. افزودن لینک‌های دوره**
-**POST** `/api/lessons/add`
+**POST** `/api/lessons/addCourses`
 ```json
 {
   "courseLinks": [
@@ -84,7 +84,7 @@ npm run dev
       "title": "معماري كامپيوتر",
       "year": "دوم - ۱۴۰۳",
       "teacher": "زارعي",
-      "group": 1,
+      "group": "1",
       "codeLesson": "۲۷۰۵۳۰۱۵۱"
     }
   ]
