@@ -18,28 +18,41 @@ type ResultGetCourseFormation = {
 type ResultGetCourseSessions = {
   date: string;
   url: string;
-  class: Number;
+  class: number;
 }[];
 
 class LessonsModel {
   static async addCourses(courseLinks: courseLink[]) {
     if (courseLinks.length === 0) {
-      return {
-        affectedRows: 0,
-      };
+      return { affectedRows: 0 };
     }
-    const values = courseLinks
+
+    const values: (string | number)[] = [];
+
+    const placeholders = courseLinks
       .map(
-        ({ class: cls, url, date, title, year, teacher, group, codeLesson }) =>
-          `(${cls}, '${url}', '${date}', '${title}', '${year}', '${teacher}', '${group}', '${codeLesson}')`
+        ({
+          class: cls,
+          url,
+          date,
+          title,
+          year,
+          teacher,
+          group,
+          codeLesson,
+        }) => {
+          values.push(cls, url, date, title, year, teacher, group, codeLesson);
+          return `(?, ?, ?, ?, ?, ?, ?, ?)`;
+        }
       )
       .join(", ");
 
     const query = `
-        INSERT IGNORE INTO course_links (class, url, date, title, year, teacher, \`group\`, codeLesson)
-        VALUES ${values};
+      INSERT IGNORE INTO course_links (class, url, date, title, year, teacher, \`group\`, codeLesson)
+      VALUES ${placeholders};
     `;
-    const [result] = await pool.query(query);
+
+    const [result] = await pool.query(query, values);
 
     return result as AddCoursesStatus;
   }
