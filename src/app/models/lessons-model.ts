@@ -1,9 +1,25 @@
 import pool from "../../utils/mysql-database";
-
+import { courseLink } from "../router/lessons";
 interface AddCoursesStatus {
   affectedRows: number;
 }
-import { courseLink } from "../router/lessons";
+
+type ResultGetCourses = {
+  title: string;
+  codeLesson: string;
+}[];
+
+type ResultGetCourseFormation = {
+  year: string;
+  group: string;
+  teacher: string;
+  codeLesson: string;
+}[];
+type ResultGetCourseSessions = {
+  date: string;
+  url: string;
+  class: Number;
+}[];
 
 class LessonsModel {
   static async addCourses(courseLinks: courseLink[]) {
@@ -27,5 +43,36 @@ class LessonsModel {
 
     return result as AddCoursesStatus;
   }
+
+  static async getCourses() {
+    const [result] = await pool.query(
+      `SELECT DISTINCT codeLesson, title FROM course_links` //
+    );
+
+    return result as ResultGetCourses;
+  }
+
+  static async getCourseFormation(codeLesson: string) {
+    const [result] = await pool.query(
+      `SELECT DISTINCT year, \`group\`, teacher ,codeLesson FROM course_links WHERE codeLesson = ? ;`,
+      [codeLesson.trim()] //
+    );
+
+    return result as ResultGetCourseFormation;
+  }
+  static async getCourseSessions(
+    codeLesson: string,
+    teacher: string,
+    year: string,
+    group: string
+  ) {
+    const [result] = await pool.query(
+      `SELECT date, url ,class FROM course_links WHERE codeLesson = ? AND teacher = ? AND year = ? AND \`group\` = ?  ORDER BY class ASC ;`,
+      [codeLesson.trim(), teacher.trim(), year.trim(), group.trim()] //
+    );
+
+    return result as ResultGetCourseSessions;
+  }
 }
+
 export default LessonsModel;
