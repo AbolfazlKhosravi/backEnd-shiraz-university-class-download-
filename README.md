@@ -55,7 +55,7 @@ CREATE TABLE `course_links` (
   `teacher` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `group` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `codeLesson` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  PRIMARY KEY (`class`,`year`,`group`,`codeLesson`),
+  PRIMARY KEY (`class`,`year`,`group`,`codeLesson`,`teacher`),
   UNIQUE KEY `url_UNIQUE` (`url`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ```
