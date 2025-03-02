@@ -1,28 +1,31 @@
 import pool from "../../utils/mysql-database";
 import { courseLink } from "../router/lessons";
+import Application from "../server";
+
 interface AddCoursesStatus {
   affectedRows: number;
 }
 
-type ResultGetCourses = {
+export type course = { title: string; codeLesson: string };
+
+export type ResultGetCourses = {
   title: string;
   codeLesson: string;
 }[];
 
-type ResultGetCourseFormation = {
+export type ResultGetCourseFormation = {
   year: string;
   group: string;
-  teacher: string;
   codeLesson: string;
 }[];
-type ResultGetCourseSessions = {
+export type ResultGetCourseSessions = {
   date: string;
   url: string;
   class: number;
 }[];
 
 class LessonsModel {
-  static async addCourses(courseLinks: courseLink[]) {
+  async addCourses(courseLinks: courseLink[]) {
     if (courseLinks.length === 0) {
       return { affectedRows: 0 };
     }
@@ -54,6 +57,12 @@ class LessonsModel {
 
     const [result] = await pool.query(query, values);
 
+    if ((result as AddCoursesStatus).affectedRows > 0) {
+      Application.updateLessonsState();
+    }
+
+    console.log("this is result:\n", result);
+
     return result as AddCoursesStatus;
   }
 
@@ -75,13 +84,12 @@ class LessonsModel {
   }
   static async getCourseSessions(
     codeLesson: string,
-    teacher: string,
     year: string,
     group: string
   ) {
     const [result] = await pool.query(
-      `SELECT date, url ,class FROM course_links WHERE codeLesson = ? AND teacher = ? AND year = ? AND \`group\` = ?  ORDER BY class ASC ;`,
-      [codeLesson.trim(), teacher.trim(), year.trim(), group.trim()] //
+      `SELECT date, url ,class FROM course_links WHERE codeLesson = ? AND year = ? AND \`group\` = ?  ORDER BY class ASC ;`,
+      [codeLesson.trim(), year.trim(), group.trim()] //
     );
 
     return result as ResultGetCourseSessions;

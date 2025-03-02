@@ -1,15 +1,21 @@
-import express from "express";
-import "dotenv/config";
-import pool from "../utils/mysql-database";
-import cors from "cors";
-import path from "path";
-import allRoutes from "./router/router";
 import { NextFunction, Request, Response } from "express-serve-static-core";
 import createError, { HttpError } from "http-errors";
+import pool from "../utils/mysql-database";
+import allRoutes from "./router/router";
+import express from "express";
+import cors from "cors";
+import path from "path";
+import "dotenv/config";
+import TelegramBot from "./telegramBot/telegramBot";
+import { ResultGetCourses } from "./models/lessons-model";
+import LessonsModel from "./models/lessons-model"; // REFACTOR:
 
 class Application {
   #app = express();
   #Port = process.env.APP_PORT || 5500;
+  // @ts-ignore
+  static lessonsState: ResultGetCourses = [];
+  private telegramBot = new TelegramBot();
 
   constructor() {
     this.createServer();
@@ -17,6 +23,11 @@ class Application {
     this.configServer();
     this.configRoutes();
     this.errorHandling();
+    try {
+      Application.updateLessonsState().then(() => this.telegramBot.start());
+    } catch (error) {
+      console.log("error in telegramBot start: " + error);
+    }
   }
 
   createServer(): void {
@@ -48,7 +59,7 @@ class Application {
     this.#app.use(express.urlencoded({ extended: true }));
     this.#app.use(express.static(path.join(__dirname, "..", "..", "public")));
   }
-  
+
   configRoutes(): void {
     this.#app.use("/api", allRoutes);
   }
@@ -73,6 +84,12 @@ class Application {
         });
       }
     );
+  }
+
+  static async updateLessonsState() {
+    Application.lessonsState = await LessonsModel.getCourses();
+    console.log("LessonsState updated!");
+    // console.log("LessonsState: ", Application.lessonsState);
   }
 }
 export default Application;
